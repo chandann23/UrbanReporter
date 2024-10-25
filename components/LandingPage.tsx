@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, SafeAreaView } from 'react-native';
-import { Camera, MapPin, Zap, Bell, Users, ThumbsUp } from 'react-native-feather'; // Replace icons with react-native compatible icons
+import { Camera, MapPin, Zap, Bell, Users, ThumbsUp } from 'lucide-react';
+import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 
 const FeatureCard = ({ Icon, title, description }: { Icon: React.ElementType; title: string; description: string }) => (
   <View style={styles.featureCard}>
@@ -11,6 +13,22 @@ const FeatureCard = ({ Icon, title, description }: { Icon: React.ElementType; ti
 );
 
 const LandingPage: React.FC = () => {
+  const { isSignedIn, signOut } = useAuth();
+  const { user } = useUser();
+  const router = useRouter();
+
+  const handleSignIn = () => {
+    router.push("/sign-in");
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
@@ -26,9 +44,21 @@ const LandingPage: React.FC = () => {
             <TouchableOpacity style={styles.navButton}>
               <Text style={styles.navButtonText}>Contact</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navButtonOutline}>
-              <Text style={styles.navButtonTextOutline}>Login</Text>
-            </TouchableOpacity>
+
+            <SignedIn>
+              <View style={styles.userSection}>
+                <Text style={styles.welcomeText}>Welcome, {user?.firstName}</Text>
+                <TouchableOpacity style={styles.navButtonOutline} onPress={handleSignOut}>
+                  <Text style={styles.navButtonTextOutline}>Sign Out</Text>
+                </TouchableOpacity>
+              </View>
+            </SignedIn>
+
+            <SignedOut>
+              <TouchableOpacity style={styles.navButtonOutline} onPress={handleSignIn}>
+                <Text style={styles.navButtonTextOutline}>Sign In</Text>
+              </TouchableOpacity>
+            </SignedOut>
           </View>
         </View>
 
@@ -41,12 +71,23 @@ const LandingPage: React.FC = () => {
             <Text style={styles.heroSubtitle}>
               Report and track urban issues in real-time. Together, let's build a better city for everyone.
             </Text>
-            <TouchableOpacity style={styles.ctaButton}>
-              <Text style={styles.ctaButtonText}>Get Started</Text>
-            </TouchableOpacity>
+            <SignedOut>
+              <TouchableOpacity style={styles.ctaButton} onPress={handleSignIn}>
+                <Text style={styles.ctaButtonText}>Get Started</Text>
+              </TouchableOpacity>
+            </SignedOut>
+            <SignedIn>
+              <TouchableOpacity
+                style={styles.ctaButton}
+                onPress={() => router.push("/Reports")}
+              >
+                <Text style={styles.ctaButtonText}>Go to Dashboard</Text>
+              </TouchableOpacity>
+            </SignedIn>
           </View>
         </ImageBackground>
 
+        {/* Rest of your component remains the same */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>How It Works</Text>
           <View style={styles.featureGrid}>
@@ -70,14 +111,20 @@ const LandingPage: React.FC = () => {
           <Text style={styles.sectionSubtitleWhite}>
             Join thousands of active citizens who are shaping their cities, one report at a time.
           </Text>
-          <TouchableOpacity style={styles.ctaButtonSecondary}>
-            <Text style={styles.ctaButtonText}>Download Now</Text>
-          </TouchableOpacity>
+          <SignedOut>
+            <TouchableOpacity style={styles.ctaButtonSecondary} onPress={handleSignIn}>
+              <Text style={styles.ctaButtonText}>Join Now</Text>
+            </TouchableOpacity>
+          </SignedOut>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -209,7 +256,18 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
   },
+  userSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#4A90E2',
+  },
 });
 
+
 export default LandingPage;
+
 
