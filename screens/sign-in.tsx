@@ -22,7 +22,6 @@ export default function SignIn() {
   const onSignInWithGoogle = useCallback(async () => {
     try {
       const { createdSessionId, setActive } = await startOAuthFlow();
-
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
       }
@@ -37,12 +36,10 @@ export default function SignIn() {
         <FontAwesome name="map-marker" size={64} color="#4A90E2" style={styles.icon} />
         <Text style={styles.title}>Welcome to UrbanReporter</Text>
         <Text style={styles.subtitle}>
-          Sign Up to report and track urban issues in your community
+          Sign in to report and track urban issues in your community
         </Text>
-         <Link href={"/sign-in"}><Text>Already have an account? Sign in</Text></Link>
-
+        <Text>New to UrbanReporter? Sign up</Text>
       </View>
-
       <TouchableOpacity
         style={styles.googleButton}
         onPress={onSignInWithGoogle}
@@ -100,4 +97,5 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
-})
+});
+
