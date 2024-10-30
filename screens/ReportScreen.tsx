@@ -24,6 +24,15 @@ type IssueType = {
   title: string;
   description: string;
 };
+interface ReportData {
+  title: string;
+  description: string;
+  location: string;
+  category: string;
+  image_url?: string | null;
+}
+
+const API_URL = 'http://192.168.1.100:5000/api'; // Replace with your actual IP or server address
 
 export default function ReportScreen({ route, navigation }: Props) {
   const [selectedIssue, setSelectedIssue] = useState<IssueType | null>(null);
@@ -49,16 +58,79 @@ export default function ReportScreen({ route, navigation }: Props) {
     setFormStep('details');
   };
 
-  const handleSubmit = () => {
-    // Handle form submission
-    console.log({
-      issueType: selectedIssue?.title,
-      title,
-      description,
-      location,
-    });
+  const handleSubmit = async (): Promise<void> => {
+    if (!selectedIssue || !title || !description || !location) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    try {
+      let imageUrl: string | null = null;
+      if (imageUri) {
+        imageUrl = await uploadImage(imageUri);
+      }
+
+      const reportData: ReportData = {
+        title,
+        description,
+        location,
+        category: selectedIssue.title,
+        image_url: imageUrl,
+      };
+
+      const response = await fetch(`${API_URL}/reports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      if (response.ok) {
+        const createdReport = await response.json();
+        console.log('Report created:', createdReport);
+        Alert.alert('Success', 'Report submitted successfully');
+        navigation.navigate('AllReports');
+      } else {
+        const errorData = await response.json();
+        console.error('Error creating report:', errorData);
+        Alert.alert('Error', errorData.error || 'Failed to submit report');
+      }
+    } catch (error) {
+      console.error('Error creating report:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
+    }
   };
 
+
+  const uploadImage = async (uri: string): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', {
+      uri: uri,
+      type: 'image/jpeg',
+      name: 'upload.jpg',
+    } as any);  // 'as any' is used here because the exact type is not standard
+
+    try {
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.imageUrl;
+      } else {
+        throw new Error('Image upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
 
   const getLocation = async () => {
     // Request permission
