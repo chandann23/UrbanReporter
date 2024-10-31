@@ -1,27 +1,25 @@
 {
   "expo": {
-    "name": "UrbanReporter",
-    "slug": "UrbanReporter",
+    "name": "RNNavigation",
+    "slug": "RNNavigation",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "your-app-scheme",
+    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
-      "package": "your.package.name",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "your.bundle.identifier"
     },
     "web": {
       "bundler": "metro",
